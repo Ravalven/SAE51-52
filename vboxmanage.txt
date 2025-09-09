@@ -1,0 +1,14 @@
+vboxmanage createvm --name "Test1" -ostype "Debian_64" --register
+
+vboxmanage list vms
+
+vboxmanage createmedium disk --filename "Test1.vdi" --size 64000 --format VDI
+vboxmanage storagectl "Test1" --name "SATA Controller" --add sata --controller IntelAhci
+vboxmanage storageattach "Test1" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "Test1.vdi"
+vboxmanage storageattach "Test1" --storagectl "SATA Controller" --port 1 --device 0 --type dvddrive --medium ~/sae51/debian-12.12.0-amd64-netinst.iso 
+vboxmanage modifyvm "Test1" --memory 4096 --nic1 nat
+
+vboxmanage startvm "Test1"
+
+
+vboxmanage unregistervm "Test1" --delete
