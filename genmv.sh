@@ -13,32 +13,39 @@ if [ "$ACTION" = "N" ]; then
         exit 1
     fi
     
-    if VBoxManage showvminfo "$VM_NAME" > /dev/null 2>&1; then
-        VBoxManage unregistervm "$VM_NAME" --delete
+    echo "Vous êtes sur le point de créer une machine virtuelle nommée '$VM_NAME'."
+    read -p "Confirmez-vous ? (oui/non) " CONFIRMATION
+    
+    if [ "$CONFIRMATION" = "oui" ]; then
+        VBoxManage createvm --name "$VM_NAME" --ostype "Debian_64" --register
+        VBoxManage createmedium disk --filename "$HOME/VirtualBox VMs/$VM_NAME/$VM_NAME.vdi" --size 64000 --format VDI
+        VBoxManage modifyvm "$VM_NAME" --memory 4096 --nic1 nat --boot1 net
+        VBoxManage storagectl "$VM_NAME" --name "SATA Controller" --add sata --controller IntelAhci
+        VBoxManage storageattach "$VM_NAME" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "$HOME/VirtualBox VMs/$VM_NAME/$VM_NAME.vdi"
+        echo "La machine virtuelle '$VM_NAME' a été créée avec succès."
+    else
+        echo "Opération annulée."
     fi
-
-    VBoxManage createvm --name "$VM_NAME" --ostype "Debian_64" --register
-    VBoxManage createmedium disk --filename "$HOME/VirtualBox VMs/$VM_NAME/$VM_NAME.vdi" --size 64000 --format VDI
-    VBoxManage modifyvm "$VM_NAME" --memory 4096 --nic1 nat --boot1 net
-    VBoxManage storagectl "$VM_NAME" --name "SATA Controller" --add sata --controller IntelAhci
-    VBoxManage storageattach "$VM_NAME" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "$HOME/VirtualBox VMs/$VM_NAME/$VM_NAME.vdi"
-    
-    read -p "Vérifiez la machine dans la GUI de VirtualBox, puis appuyez sur ENTREE pour continuer..."
-    
-    VBoxManage unregistervm "$VM_NAME" --delete
 
 elif [ "$ACTION" = "S" ]; then
     if [ -z "$VM_NAME" ]; then
         echo "Erreur : Le nom de la machine est manquant pour l'action 'S'."
         exit 1
     fi
-
-    if ! VBoxManage showvminfo "$VM_NAME" > /dev/null 2>&1; then
-        echo "Erreur : La machine '$VM_NAME' n'existe pas."
-        exit 1
+    
+    echo "Vous êtes sur le point de supprimer la machine virtuelle nommée '$VM_NAME'."
+    read -p "Confirmez-vous ? (oui/non) " CONFIRMATION
+    
+    if [ "$CONFIRMATION" = "oui" ]; then
+        if ! VBoxManage showvminfo "$VM_NAME" > /dev/null 2>&1; then
+            echo "Erreur : La machine '$VM_NAME' n'existe pas."
+            exit 1
+        fi
+        VBoxManage unregistervm "$VM_NAME" --delete
+        echo "La machine virtuelle '$VM_NAME' a été supprimée."
+    else
+        echo "Opération annulée."
     fi
-
-    VBoxManage unregistervm "$VM_NAME" --delete
 
 elif [ "$ACTION" = "L" ]; then
     VBoxManage list vms
@@ -48,7 +55,6 @@ elif [ "$ACTION" = "D" ]; then
         echo "Erreur : Le nom de la machine est manquant pour l'action 'D'."
         exit 1
     fi
-
     VBoxManage startvm "$VM_NAME" --type headless
 
 elif [ "$ACTION" = "A" ]; then
@@ -56,7 +62,6 @@ elif [ "$ACTION" = "A" ]; then
         echo "Erreur : Le nom de la machine est manquant pour l'action 'A'."
         exit 1
     fi
-
     VBoxManage controlvm "$VM_NAME" poweroff
 
 else
