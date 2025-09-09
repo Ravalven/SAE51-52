@@ -1,11 +1,12 @@
 if [ $# -lt 1 ]; then
     echo "Erreur : vous devez spécifier une action (N, S, L, D, A)."
-    echo "Usage: $0 <action> [nom_machine]"
+    echo "Usage: $0 <action> [nom_vm]"
     exit 1
 fi
 
 ACTION=$1
 VM_NAME=$2
+VMs = $(vboxmanage list vms | grep -w "\"$VM_NAME\"")
 
 if [ "$ACTION" = "N" ]; then
     if [ -z "$VM_NAME" ]; then
@@ -13,9 +14,8 @@ if [ "$ACTION" = "N" ]; then
         exit 1
     fi
     
-    VBoxManage showvminfo "$VM_NAME" > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "Erreur : une VM nommée '$VM_NAME' existe déjà. Supprimer une VM : \"$0 S [nom_vm]\""
+    if [ -n "$VMs" ]; then
+        echo "Erreur : une VM nommée '$VMs' existe déjà. Supprimer une VM : \"$0 S [nom_vm]\""
         exit 1
     fi
 
@@ -59,6 +59,6 @@ elif [ "$ACTION" = "A" ]; then
 
 else
     echo "Erreur : Action '$ACTION' non reconnue."
-    echo "Utilisation : $0 <action> [nom_machine]"
+    echo "Usage: $0 <action> [nom_machine]"
     exit 1
 fi
