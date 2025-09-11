@@ -1,12 +1,13 @@
+#!/bin/bash
+
 if [ $# -lt 1 ]; then
     echo "Erreur : vous devez spécifier une action (N, S, L, D, A)."
-    echo "Usage: $0 <action> [nom_vm]"
+    echo "Usage: $0 <action> [nom_machine]"
     exit 1
 fi
 
 ACTION=$1
 VM_NAME=$2
-VMs = $(vboxmanage list vms | grep -w "\"$VM_NAME\"")
 
 if [ "$ACTION" = "N" ]; then
     if [ -z "$VM_NAME" ]; then
@@ -14,8 +15,9 @@ if [ "$ACTION" = "N" ]; then
         exit 1
     fi
     
-    if [ -n "$VMs" ]; then
-        echo "Erreur : une VM nommée '$VMs' existe déjà. Supprimer une VM : \"$0 S [nom_vm]\""
+    VBoxManage showvminfo "$VM_NAME" > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Erreur : une VM nommée '$VM_NAME' existe déjà. Supprimer une VM : \"$0 S [nom_vm]\""
         exit 1
     fi
 
@@ -25,6 +27,12 @@ if [ "$ACTION" = "N" ]; then
     VBoxManage storagectl "$VM_NAME" --name "SATA Controller" --add sata --controller IntelAhci
     VBoxManage storageattach "$VM_NAME" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "$HOME/VirtualBox VMs/$VM_NAME/$VM_NAME.vdi"
     echo "La machine virtuelle '$VM_NAME' a été créée avec succès."
+
+    # Ajout des métadonnées
+    DATE=$(date '+%Y-%m-%d %H:%M:%S')
+    USER_NAME=$USER
+    VBoxManage setextradata "$VM_NAME" "meta.creation" "$DATE"
+    VBoxManage setextradata "$VM_NAME" "meta.owner" "$USER_NAME"
 
 elif [ "$ACTION" = "S" ]; then
     if [ -z "$VM_NAME" ]; then
@@ -41,7 +49,15 @@ elif [ "$ACTION" = "S" ]; then
     echo "La machine virtuelle '$VM_NAME' a été supprimée."
 
 elif [ "$ACTION" = "L" ]; then
-    VBoxManage list vms
+    # Liste des VMs avec métadonnées
+    VBoxManage list vms | while read -r line; do
+        VM=$(echo "$line" | awk '{print $1}' | tr -d '"')
+        if [ -n "$VM" ]; then
+            DATE=$(VBoxManage getextradata "$VM" "meta.creation" | awk -F ': ' '{print $2}')
+            OWNER=$(VBoxManage getextradata "$VM" "meta.owner" | awk -F ': ' '{print $2}')
+            echo "VM: $VM | Créée le: ${DATE:-Inconnue} | Propriétaire: ${OWNER:-Inconnu}"
+        fi
+    done
 
 elif [ "$ACTION" = "D" ]; then
     if [ -z "$VM_NAME" ]; then
@@ -59,6 +75,6 @@ elif [ "$ACTION" = "A" ]; then
 
 else
     echo "Erreur : Action '$ACTION' non reconnue."
-    echo "Usage: $0 <action> [nom_machine]"
+    echo "Utilisation : $0 <action> [nom_machine]"
     exit 1
 fi
