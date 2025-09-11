@@ -1,5 +1,3 @@
-#!/bin/bash
-
 if [ $# -lt 1 ]; then
     echo "Erreur : vous devez spécifier une action (N, S, L, D, A)."
     echo "Usage: $0 <action> [nom_machine]"
