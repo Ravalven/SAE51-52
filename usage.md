@@ -1,8 +1,15 @@
 # SAE 52 Piloter un projet informatique
 
-Ce rapport présente notre travail réalisé dans le carde de la SAE 51. Le but était d'automatiser la création de machine virtuelle avec certains paramètres. 
+Date : 11/09/2025
+Auteur : 
+
+Ce rapport présente notre travail réalisé dans le carde de la SAE 51. Le but était d'automatiser la création de machine virtuelle avec certains paramètres à l'aide d'un script. 
+Nous avons décidé d'utiliser un script shell bach sous linux.
 
 ## 1) Guide d'utilisation
+
+*
+*
 
 ## 2) Développement du projet
 
@@ -14,6 +21,8 @@ Le changement de poste nous a forcé à nous adapter et a être organisé dans n
 
 Nous avons pu rencontré des difficultés lors de l'installation de VirtualBox et dans la virtualisation dans la machine virtuelle.
 
+En terme d'amélioration, il aurait été intéréssant de pouvoir créer plusieurs machines virtuelles en une exécution du programme.
+
 ## 3) Conclusion
 
-Pour conclure ce projet nous a permis de découvrir l'utilisation de VirtualBox via VBoxManage.
+Pour conclure, ce projet nous a permis de découvrir l'utilisation de VirtualBox via VBoxManage. Il nous a donné l'opportunité d'approfndir les notions du shell comme la gestion d'arguments et les interactions entre le script et l'OS.
