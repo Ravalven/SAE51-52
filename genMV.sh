@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # On vérifie qu'au moins une action a été spécifiée
 if [ $# -lt 1 ]; then
     echo "Erreur : vous devez indiquer une action (N, S, L, D, A)."
